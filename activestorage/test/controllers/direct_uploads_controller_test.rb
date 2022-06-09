@@ -213,8 +213,16 @@ class ActiveStorage::DiskDirectUploadsControllerTest < ActionDispatch::Integrati
       "library_ID": "12345"
     }
 
-    post rails_direct_uploads_url, params: { blob: {
-      filename: "racecar.jpg", byte_size: file.size, checksum: checksum, content_type: "image/jpg", metadata: metadata, model: "User" } }
+    post rails_direct_uploads_url, params: {
+      blob: {
+        filename: "racecar.jpg",
+        byte_size: file.size,
+        checksum: checksum,
+        content_type: "image/jpg",
+        metadata: metadata,
+        signed_model_and_attribute: rails_direct_uploads_signed_model_and_attribute("User.avatar"),
+      }
+    }
 
     assert_response :success
 
@@ -244,8 +252,16 @@ class ActiveStorage::DiskDirectUploadsControllerTest < ActionDispatch::Integrati
       "library_ID": "12345"
     }
 
-    post rails_direct_uploads_url, params: { blob: {
-      filename: "racecar.jpg", byte_size: file.size, checksum: checksum, content_type: "image/jpg", metadata: metadata, model: "User" } }
+    post rails_direct_uploads_url, params: {
+      blob: {
+        filename: "racecar.jpg",
+        byte_size: file.size,
+        checksum: checksum,
+        content_type: "image/jpg",
+        metadata: metadata,
+        signed_model_and_attribute: rails_direct_uploads_signed_model_and_attribute("User.avatar"),
+      }
+    }
 
     assert_response :success
 
@@ -262,6 +278,45 @@ class ActiveStorage::DiskDirectUploadsControllerTest < ActionDispatch::Integrati
   end
 
   test "creating new direct upload with model where validations fail" do
+    User.validates :avatar, attachment_content_type: { with: /\Atext\// }
+    User.validates :avatar, attachment_byte_size: { minimum: 50.megabytes }
+
+    file = file_fixture("racecar.jpg").open
+    checksum = Digest::MD5.base64digest(file.read)
+    metadata = {
+      "foo": "bar",
+      "my_key_1": "my_value_1",
+      "my_key_2": "my_value_2",
+      "platform": "my_platform",
+      "library_ID": "12345"
+    }
+
+    post rails_direct_uploads_url, params: {
+      blob: {
+       filename: "racecar.jpg",
+       byte_size: file.size,
+       checksum: checksum,
+       content_type: "image/jpg",
+       metadata: metadata,
+       signed_model_and_attribute: rails_direct_uploads_signed_model_and_attribute("User.avatar"),
+      }
+    }
+
+    assert_response :unprocessable_entity
+
+    @response.parsed_body.tap do |details|
+      assert_equal Hash[
+        "content_type" => [
+          "is not included in the list",
+        ],
+        "byte_size" => [
+          "must be greater than or equal to 50 MB",
+        ],
+      ], details["errors"]
+    end
+  end
+
+  test "creating new direct upload with model where validations fail with custom messages" do
     User.validates :avatar, attachment_content_type: { with: /\Atext\//, message: "must be a text file" }
     User.validates :avatar, attachment_byte_size: { minimum: 50.megabytes, message: "can't be smaller than 50 MB" }
 
@@ -275,10 +330,29 @@ class ActiveStorage::DiskDirectUploadsControllerTest < ActionDispatch::Integrati
       "library_ID": "12345"
     }
 
-    post rails_direct_uploads_url, params: { blob: {
-      filename: "racecar.jpg", byte_size: file.size, checksum: checksum, content_type: "image/jpg", metadata: metadata, model: "User" } }
+    post rails_direct_uploads_url, params: {
+      blob: {
+       filename: "racecar.jpg",
+       byte_size: file.size,
+       checksum: checksum,
+       content_type: "image/jpg",
+       metadata: metadata,
+       signed_model_and_attribute: rails_direct_uploads_signed_model_and_attribute("User.avatar"),
+      }
+    }
 
     assert_response :unprocessable_entity
+
+    @response.parsed_body.tap do |details|
+      assert_equal Hash[
+        "content_type" => [
+          "must be a text file",
+        ],
+        "byte_size" => [
+          "can't be smaller than 50 MB",
+        ],
+      ], details["errors"]
+    end
   end
 
   private

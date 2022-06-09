@@ -115,14 +115,34 @@ Active Storage includes attachment validators for the following properties:
 ```ruby
 class User < ActiveRecord::Base
   has_one_attached :avatar
+
   # Validating Size
   # Accepts options for: `:in`, `:minimum`, `:maximum`
   validates :avatar, attachment_byte_size: { in: 0..1.megabyte }
+  validates :avatar, attachment_byte_size: { minimum: 17.kilobytes }
+  validates :avatar, attachment_byte_size: { maximum: 37.megabytes }
+
+  # If you pass in a range `:in` is assumed and used
   validates :avatar, attachment_byte_size: 0..1.megabyte
+
+  # Alternative syntax:
+  # validates_attachment :avatar, byte_size: { in: 0..1.megabyte }
+  # validates_attachment :avatar, byte_size: 0..1.megabyte
+  # validates_attachment_byte_size :avatar, in: 0..1.megabyte
+
   # Validating Content Type
   # Accepts options for: `:in`, `:not`
   validates :avatar, attachment_content_type: { in: %w[image/jpeg image/png] }
+  validates :avatar, attachment_content_type: { not: %[image/gif] }
+
+  # If you pass in a string or array `:in` is assumed and used
   validates :avatar, attachment_content_type: "image/jpeg"
+  validates :avatar, attachment_content_type: %w[image/jpeg image/png]
+
+  # Alternative syntax:
+  # validates_attachment :avatar, content_type: { in: %w[image/jpeg image/png] }
+  # validates_attachment :avatar, content_type: "image/jpeg"
+  # validates_attachment_content_type :avatar, in: %w[image/jpeg image/png]
 end
 ```
 

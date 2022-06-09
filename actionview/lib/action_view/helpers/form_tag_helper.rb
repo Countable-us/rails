@@ -987,12 +987,12 @@ module ActionView
         def add_direct_upload_attributes(options)
           if options.delete(:direct_upload) && respond_to?(:rails_direct_uploads_url)
             options["data-direct-upload-url"] = rails_direct_uploads_url
-            if options[:direct_upload_model]
-              options["data-direct-upload-model"] = options.delete(:direct_upload_model)
-            elsif options[:object]
-              options["data-direct-upload-model"] = options[:object].class.name
-            end
           end
+
+          if options[:direct_upload_signed_model_and_attribute].present? && respond_to?(:rails_direct_uploads_signed_model_and_attribute)
+            options["data-direct-upload-signed-model-and-attribute"] = rails_direct_uploads_signed_model_and_attribute(options.delete(:direct_upload_signed_model_and_attribute))
+          end
+
           options
         end
     end

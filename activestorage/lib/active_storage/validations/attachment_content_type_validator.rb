@@ -23,6 +23,10 @@ module ActiveStorage
       end
 
       private
+        def blob_field_name
+          :content_type
+        end
+
         def error_key_for(check_name)
           { in: :inclusion, not: :exclusion, with: :inclusion }[check_name.to_sym]
         end
@@ -39,7 +43,24 @@ module ActiveStorage
             !check_value.include?(blob.content_type)
           when :with
             # TODO: implement check_options_validity from AM::Validators::FormatValidator
-            check_value.match?(blob.content_type)
+            # QUESTION: How best to implement check_options_validity? Going with copy+paste for now.
+            check_value = Regexp.new(check_value) if check_value.is_a?(String)
+            if check_value.is_a?(Regexp)
+              if check_value.source.start_with?("^") || (check_value.source.end_with?("$") && !check_value.source.end_with?("\\$"))
+                raise ArgumentError, "The provided regular expression is using multiline anchors (^ or $), " \
+                "which may present a security risk. Did you mean to use \\A and \\z, or forgot to add the " \
+                ":multiline => true option?"
+              end
+              check_value.match?(blob.content_type)
+            elsif check_value.respond_to?(:call)
+              # QUESTION: One would expect the proc or lambda to be called with
+              # the Attachable, not the Blob. However, for direct uploads there
+              # is no Attachable available. Should we pass the blob instead? Or
+              # nil?
+              check_value.call(@record || blob).match?(blob.content_type)
+            else
+              raise ArgumentError, "A regular expression, proc, or lambda must be supplied to :with"
+            end
           end
         end
     end

@@ -16,21 +16,21 @@ module ActiveStorage
       end
 
       private
-      def error_key_for(check_name)
-        ## Not Required
-      end
+        def error_key_for(check_name)
+          ## Not Required
+        end
 
-      def options_redundant?
-        ## Not Required
-      end
+        def options_redundant?
+          ## Not Required
+        end
 
-      def passes_check?(blob, check_name, check_value)
-        ## Not Required
-      end
+        def passes_check?(blob, check_name, check_value)
+          ## Not Required
+        end
     end
 
     module HelperMethods
-      # Validates the content type of the ActiveStorage attachments. Happens by
+      # Validates the presence of the ActiveStorage attachments. Happens by
       # default on save.
       #
       #   class Employee < ActiveRecord::Base
@@ -52,4 +52,3 @@ module ActiveStorage
     end
   end
 end
-

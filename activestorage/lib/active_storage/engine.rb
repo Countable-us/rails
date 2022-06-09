@@ -176,6 +176,8 @@ module ActiveStorage
     initializer "action_view.configuration" do
       config.after_initialize do |app|
         ActiveSupport.on_load(:action_view) do
+          ActionView::Helpers.include(ActiveStorage::DirectUploadsHelper)
+
           multiple_file_field_include_hidden = app.config.active_storage.delete(:multiple_file_field_include_hidden)
 
           unless multiple_file_field_include_hidden.nil?

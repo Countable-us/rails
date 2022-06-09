@@ -34,6 +34,10 @@ module ActiveStorage
       end
 
       private
+        def blob_field_name
+          :byte_size
+        end
+
         def error_key_for(check_name)
           check_name == :in ? :in_between : check_name
         end

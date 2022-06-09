@@ -8,12 +8,18 @@ module ActiveStorage
         @error_options = { message: options[:message] }
       end
 
-      def valid_with?(blob)
+      def valid_with?(blob, attribute=nil)
         valid = true
         each_check do |check_name, check_value|
           next if passes_check?(blob, check_name, check_value)
 
-          @record.errors.add(@name, error_key_for(check_name), **error_options) if @record
+          # If we're dealing with a Blob that has an Attachment to an Attachable
+          if @record
+            @record.errors.add(@name, error_key_for(check_name), **error_options)
+          # If we're dealing with a direct upload Blob that has no Attachment to an Attachable
+          elsif attribute.present?
+            blob.errors.add(blob_field_name, error_key_for(check_name), **error_options)
+          end
           valid = false
         end
         valid
@@ -33,6 +39,10 @@ module ActiveStorage
 
         def available_checks
           self.class::AVAILABLE_CHECKS
+        end
+
+        def blob_field_name
+          :base
         end
 
         def options_blank?

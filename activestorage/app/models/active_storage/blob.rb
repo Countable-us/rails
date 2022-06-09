@@ -379,15 +379,19 @@ class ActiveStorage::Blob < ActiveStorage::Record
   #
   # Returns false if the model cannot be found.
   # Returns true if no validators are configured on the model.
-  def valid_with?(klass_name = nil)
-    return true if klass_name.nil?
+  def valid_with?(signed_model_and_attribute = nil)
+    return true if signed_model_and_attribute.nil?
+
+    klass_name, attribute = ActiveStorage.verifier.verified(signed_model_and_attribute).split(".")
 
     model = ActiveRecord::Base.const_get(klass_name) rescue nil
     return false if model.nil?
 
-    model.validators.select { |v| v.is_a?(ActiveStorage::Validations::BaseValidator) }.all? do |validator|
-      validator.valid_with?(self)
+    model.validators.select { |v| v.is_a?(ActiveStorage::Validations::BaseValidator) && v.attributes.include?(attribute.to_sym) }.each do |validator|
+      validator.valid_with?(self, attribute)
     end
+
+    self.errors.blank?
   end
 
   private

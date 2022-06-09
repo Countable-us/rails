@@ -10,7 +10,7 @@ class ActiveStorage::AttachmentContentTypeValidatorTest < ActiveSupport::TestCas
     @old_validators = User._validators.deep_dup
     @old_callbacks = User._validate_callbacks.deep_dup
 
-    @blob = create_blob(filename: "funky.jpg")
+    @blob = create_blob
     @user = User.create(name: "Anjali")
 
     @content_types = %w[text/plain image/jpeg]
@@ -75,7 +75,7 @@ class ActiveStorage::AttachmentContentTypeValidatorTest < ActiveSupport::TestCas
   end
 
   test "persisted record, updating attachments" do
-    old_blob = create_blob(filename: "town.jpg")
+    old_blob = create_blob
     @user.avatar.attach(old_blob)
     @user.highlights.attach(old_blob)
 
@@ -294,8 +294,8 @@ class ActiveStorage::AttachmentContentTypeValidatorTest < ActiveSupport::TestCas
   end
 
   test "validating with `validates()`, invalid shortcut option" do
-    User.validates(:avatar, attachment_content_type: @bad_content_types.first.to_sym)
-    User.validates(:highlights, attachment_content_type: @bad_content_types.first.to_sym)
+    User.validates(:avatar, attachment_content_type: @bad_content_types.first)
+    User.validates(:highlights, attachment_content_type: @bad_content_types.first)
 
     @user.avatar.attach(@blob)
     @user.highlights.attach(@blob)
@@ -306,8 +306,8 @@ class ActiveStorage::AttachmentContentTypeValidatorTest < ActiveSupport::TestCas
 
     User.clear_validators!
 
-    User.validates(:avatar, attachment_content_type: @content_types.first.to_sym)
-    User.validates(:highlights, attachment_content_type: @content_types.first.to_sym)
+    User.validates(:avatar, attachment_content_type: @content_types.first)
+    User.validates(:highlights, attachment_content_type: @content_types.first)
 
     assert @user.save
   end
@@ -365,25 +365,6 @@ class ActiveStorage::AttachmentContentTypeValidatorTest < ActiveSupport::TestCas
 
     User.validates_attachment(:avatar, content_type: @content_types)
     User.validates_attachment(:highlights, content_type: @content_types)
-
-    assert @user.save
-  end
-
-  test "validating with `validates_attachment()`, Symbol shortcut option" do
-    User.validates_attachment(:avatar, content_type: @bad_content_types.first.to_sym)
-    User.validates_attachment(:highlights, content_type: @bad_content_types.first.to_sym)
-
-    @user.avatar.attach(@blob)
-    @user.highlights.attach(@blob)
-
-    assert_not @user.valid?
-    assert_equal ["is not included in the list"], @user.errors.messages[:avatar]
-    assert_equal ["is not included in the list"], @user.errors.messages[:highlights]
-
-    User.clear_validators!
-
-    User.validates_attachment(:avatar, content_type: @content_types.first.to_sym)
-    User.validates_attachment(:highlights, content_type: @content_types.first.to_sym)
 
     assert @user.save
   end

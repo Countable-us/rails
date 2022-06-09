@@ -10,7 +10,7 @@ class ActiveStorage::AttachmentByteSizeValidatorTest < ActiveSupport::TestCase
     @old_validators = User._validators.deep_dup
     @old_callbacks = User._validate_callbacks.deep_dup
 
-    @blob = create_blob(filename: "funky.jpg")
+    @blob = create_blob
     @user = User.create(name: "Anjali")
 
     @byte_size = @blob.byte_size
@@ -82,7 +82,7 @@ class ActiveStorage::AttachmentByteSizeValidatorTest < ActiveSupport::TestCase
   end
 
   test "persisted record, updating attachments" do
-    other_blob = create_blob(filename: "town.jpg")
+    other_blob = create_blob
     @user.avatar.attach(other_blob)
     @user.highlights.attach(other_blob)
 
