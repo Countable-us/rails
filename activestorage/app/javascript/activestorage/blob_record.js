@@ -1,7 +1,7 @@
 import { getMetaValue } from "./helpers"
 
 export class BlobRecord {
-  constructor(file, checksum, url, signedModelAndAttribute) {
+  constructor(file, checksum, url, signedValidationId) {
     this.file = file
 
     this.attributes = {
@@ -9,7 +9,7 @@ export class BlobRecord {
       content_type: file.type || "application/octet-stream",
       byte_size: file.size,
       checksum: checksum,
-      signedModelAndAttribute: signedModelAndAttribute
+      signedValidationId: signedValidationId
     }
 
     this.xhr = new XMLHttpRequest

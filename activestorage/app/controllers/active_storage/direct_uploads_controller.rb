@@ -6,7 +6,7 @@
 class ActiveStorage::DirectUploadsController < ActiveStorage::BaseController
   def create
     blob = ActiveStorage::Blob.build_for_direct_upload(**blob_args)
-    if blob.valid_with?(params.dig(:blob, :signed_model_and_attribute))
+    if blob.valid_with?(params.dig(:blob, :signed_validation_id))
       blob.save!
       render json: direct_upload_json(blob)
     else

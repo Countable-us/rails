@@ -503,14 +503,14 @@
     }
   }
   class BlobRecord {
-    constructor(file, checksum, url, signedModelAndAttribute) {
+    constructor(file, checksum, url, signedValidationId) {
       this.file = file;
       this.attributes = {
         filename: file.name,
         content_type: file.type || "application/octet-stream",
         byte_size: file.size,
         checksum: checksum,
-        signedModelAndAttribute: signedModelAndAttribute
+        signedValidationId: signedValidationId
       };
       this.xhr = new XMLHttpRequest;
       this.xhr.open("POST", url, true);
@@ -597,12 +597,12 @@
   }
   let id = 0;
   class DirectUpload {
-    constructor(file, url, delegate, signedModelAndAttribute) {
+    constructor(file, url, delegate, signedValidationId) {
       this.id = ++id;
       this.file = file;
       this.url = url;
       this.delegate = delegate;
-      this.signedModelAndAttribute = signedModelAndAttribute;
+      this.signedValidationId = signedValidationId;
     }
     create(callback) {
       FileChecksum.create(this.file, ((error, checksum) => {
@@ -610,7 +610,7 @@
           callback(error);
           return;
         }
-        const blob = new BlobRecord(this.file, checksum, this.url, this.signedModelAndAttribute);
+        const blob = new BlobRecord(this.file, checksum, this.url, this.signedValidationId);
         notify(this.delegate, "directUploadWillCreateBlobWithXHR", blob.xhr);
         blob.create((error => {
           if (error) {
@@ -639,7 +639,7 @@
     constructor(input, file) {
       this.input = input;
       this.file = file;
-      this.directUpload = new DirectUpload(this.file, this.url, this, this.signedModelAndAttribute);
+      this.directUpload = new DirectUpload(this.file, this.url, this, this.signedValidationId);
       this.dispatch("initialize");
     }
     start(callback) {
@@ -670,8 +670,8 @@
     get url() {
       return this.input.getAttribute("data-direct-upload-url");
     }
-    get signedModelAndAttribute() {
-      return this.input.getAttribute("data-direct-upload-signed-model-and-attribute");
+    get signedValidationId() {
+      return this.input.getAttribute("data-direct-upload-signed-validation-id");
     }
     dispatch(name, detail = {}) {
       detail.file = this.file;

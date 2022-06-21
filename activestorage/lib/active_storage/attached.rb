@@ -12,6 +12,14 @@ module ActiveStorage
       @name, @record = name, record
     end
 
+    def to_signed_validation_id
+      if record.persisted?
+        ActiveStorage.verifier.generate("#{record.to_global_id}--#{name}")
+      else
+        ActiveStorage.verifier.generate("#{record.model_name}--#{name}")
+      end
+    end
+
     private
       def change
         record.attachment_changes[name]

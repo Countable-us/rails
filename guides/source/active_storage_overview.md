@@ -987,11 +987,12 @@ directly from the client to the cloud.
 
     `FormBuilder` will ensure any defined ActiveStorage validations get run for
     direct uploads, however if you're not using `FormBuilder` and you want to
-    apply validations to direct uploads you will need to pass in the
-    "Model.attribute" you wish to use for validating the upload:
+    apply validations to direct uploads you will need to pass in the signed
+    validation id for the ActiveStorage enabled attribute. This ensures that
+    the correct validations are run for the direct upload.
 
     ```erb
-    <input type=file data-direct-upload-url="<%= rails_direct_uploads_url %>" data-direct-upload-signed-model-and-attribute="<%= rails_direct_uploads_signed_model_and_attribute('User.avatar') %>" />
+    <input type=file data-direct-upload-url="<%= rails_direct_uploads_url %>" data-direct-upload-signed-validation-id="<%= @user.avatar.to_signed_validation_id %>" />
     ```
 
     Will apply any defined ActiveStorage validations on the `User` model's

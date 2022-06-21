@@ -220,7 +220,7 @@ class ActiveStorage::DiskDirectUploadsControllerTest < ActionDispatch::Integrati
         checksum: checksum,
         content_type: "image/jpeg",
         metadata: metadata,
-        signed_model_and_attribute: rails_direct_uploads_signed_model_and_attribute(User.new, :avatar),
+        signed_validation_id: User.new.avatar.to_signed_validation_id,
       }
     }
 
@@ -259,7 +259,7 @@ class ActiveStorage::DiskDirectUploadsControllerTest < ActionDispatch::Integrati
         checksum: checksum,
         content_type: "image/jpeg",
         metadata: metadata,
-        signed_model_and_attribute: rails_direct_uploads_signed_model_and_attribute(User.new, :avatar),
+        signed_validation_id: User.new.avatar.to_signed_validation_id,
       }
     }
 
@@ -298,7 +298,7 @@ class ActiveStorage::DiskDirectUploadsControllerTest < ActionDispatch::Integrati
        checksum: checksum,
        content_type: "image/jpeg",
        metadata: metadata,
-       signed_model_and_attribute: rails_direct_uploads_signed_model_and_attribute(User.new, :avatar),
+       signed_validation_id: User.new.avatar.to_signed_validation_id,
       }
     }
 
@@ -337,7 +337,7 @@ class ActiveStorage::DiskDirectUploadsControllerTest < ActionDispatch::Integrati
        checksum: checksum,
        content_type: "image/jpeg",
        metadata: metadata,
-       signed_model_and_attribute: rails_direct_uploads_signed_model_and_attribute(User.new, :avatar),
+       signed_validation_id: User.new.avatar.to_signed_validation_id,
       }
     }
 
@@ -375,7 +375,7 @@ class ActiveStorage::DiskDirectUploadsControllerTest < ActionDispatch::Integrati
        checksum: checksum,
        content_type: "image/jpeg",
        metadata: metadata,
-       signed_model_and_attribute: rails_direct_uploads_signed_model_and_attribute(User.new, :avatar),
+       signed_validation_id: User.new.avatar.to_signed_validation_id,
       }
     }
 
@@ -413,7 +413,7 @@ class ActiveStorage::DiskDirectUploadsControllerTest < ActionDispatch::Integrati
        checksum: checksum,
        content_type: "image/jpeg",
        metadata: metadata,
-       signed_model_and_attribute: rails_direct_uploads_signed_model_and_attribute(User.new, :avatar),
+       signed_validation_id: User.new.avatar.to_signed_validation_id,
       }
     }
 

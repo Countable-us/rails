@@ -379,10 +379,10 @@ class ActiveStorage::Blob < ActiveStorage::Record
   #
   # Returns false if the model cannot be found.
   # Returns true if no validators are configured on the model.
-  def valid_with?(signed_model_and_attribute = nil)
-    return true if signed_model_and_attribute.nil?
+  def valid_with?(signed_validation_id = nil)
+    return true if signed_validation_id.nil?
 
-    model_gid, attribute = ActiveStorage.verifier.verified(signed_model_and_attribute).split("--")
+    model_gid, attribute = ActiveStorage.verifier.verified(signed_validation_id).split("--")
     model = GlobalID::Locator.locate(model_gid)
 
     # When model_gid is a class name pointing to an unpersisted model
