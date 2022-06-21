@@ -218,9 +218,9 @@ class ActiveStorage::DiskDirectUploadsControllerTest < ActionDispatch::Integrati
         filename: "racecar.jpg",
         byte_size: file.size,
         checksum: checksum,
-        content_type: "image/jpg",
+        content_type: "image/jpeg",
         metadata: metadata,
-        signed_model_and_attribute: rails_direct_uploads_signed_model_and_attribute("User.avatar"),
+        signed_model_and_attribute: rails_direct_uploads_signed_model_and_attribute(User.new, :avatar),
       }
     }
 
@@ -232,9 +232,9 @@ class ActiveStorage::DiskDirectUploadsControllerTest < ActionDispatch::Integrati
       assert_equal file.size, details["byte_size"]
       assert_equal checksum, details["checksum"]
       assert_equal metadata, details["metadata"].transform_keys(&:to_sym)
-      assert_equal "image/jpg", details["content_type"]
+      assert_equal "image/jpeg", details["content_type"]
       assert_match(/rails\/active_storage\/disk/, details["direct_upload"]["url"])
-      assert_equal({ "Content-Type" => "image/jpg" }, details["direct_upload"]["headers"])
+      assert_equal({ "Content-Type" => "image/jpeg" }, details["direct_upload"]["headers"])
     end
   end
 
@@ -257,9 +257,9 @@ class ActiveStorage::DiskDirectUploadsControllerTest < ActionDispatch::Integrati
         filename: "racecar.jpg",
         byte_size: file.size,
         checksum: checksum,
-        content_type: "image/jpg",
+        content_type: "image/jpeg",
         metadata: metadata,
-        signed_model_and_attribute: rails_direct_uploads_signed_model_and_attribute("User.avatar"),
+        signed_model_and_attribute: rails_direct_uploads_signed_model_and_attribute(User.new, :avatar),
       }
     }
 
@@ -271,9 +271,9 @@ class ActiveStorage::DiskDirectUploadsControllerTest < ActionDispatch::Integrati
       assert_equal file.size, details["byte_size"]
       assert_equal checksum, details["checksum"]
       assert_equal metadata, details["metadata"].transform_keys(&:to_sym)
-      assert_equal "image/jpg", details["content_type"]
+      assert_equal "image/jpeg", details["content_type"]
       assert_match(/rails\/active_storage\/disk/, details["direct_upload"]["url"])
-      assert_equal({ "Content-Type" => "image/jpg" }, details["direct_upload"]["headers"])
+      assert_equal({ "Content-Type" => "image/jpeg" }, details["direct_upload"]["headers"])
     end
   end
 
@@ -296,9 +296,9 @@ class ActiveStorage::DiskDirectUploadsControllerTest < ActionDispatch::Integrati
        filename: "racecar.jpg",
        byte_size: file.size,
        checksum: checksum,
-       content_type: "image/jpg",
+       content_type: "image/jpeg",
        metadata: metadata,
-       signed_model_and_attribute: rails_direct_uploads_signed_model_and_attribute("User.avatar"),
+       signed_model_and_attribute: rails_direct_uploads_signed_model_and_attribute(User.new, :avatar),
       }
     }
 
@@ -335,9 +335,9 @@ class ActiveStorage::DiskDirectUploadsControllerTest < ActionDispatch::Integrati
        filename: "racecar.jpg",
        byte_size: file.size,
        checksum: checksum,
-       content_type: "image/jpg",
+       content_type: "image/jpeg",
        metadata: metadata,
-       signed_model_and_attribute: rails_direct_uploads_signed_model_and_attribute("User.avatar"),
+       signed_model_and_attribute: rails_direct_uploads_signed_model_and_attribute(User.new, :avatar),
       }
     }
 
@@ -350,6 +350,79 @@ class ActiveStorage::DiskDirectUploadsControllerTest < ActionDispatch::Integrati
         ],
         "byte_size" => [
           "can't be smaller than 50 MB",
+        ],
+      ], details["errors"]
+    end
+  end
+
+  test "creating new direct upload with model where validation uses proc and succeeds" do
+    User.validates :avatar, attachment_content_type: { with: Proc.new { |user| user.persisted? ? %w[image/png] : %w[image/jpeg] } }
+
+    file = file_fixture("racecar.jpg").open
+    checksum = Digest::MD5.base64digest(file.read)
+    metadata = {
+      "foo": "bar",
+      "my_key_1": "my_value_1",
+      "my_key_2": "my_value_2",
+      "platform": "my_platform",
+      "library_ID": "12345"
+    }
+
+    post rails_direct_uploads_url, params: {
+      blob: {
+       filename: "racecar.jpg",
+       byte_size: file.size,
+       checksum: checksum,
+       content_type: "image/jpeg",
+       metadata: metadata,
+       signed_model_and_attribute: rails_direct_uploads_signed_model_and_attribute(User.new, :avatar),
+      }
+    }
+
+    assert_response :success
+
+    @response.parsed_body.tap do |details|
+      assert_equal ActiveStorage::Blob.find(details["id"]), ActiveStorage::Blob.find_signed!(details["signed_id"])
+      assert_equal "racecar.jpg", details["filename"]
+      assert_equal file.size, details["byte_size"]
+      assert_equal checksum, details["checksum"]
+      assert_equal metadata, details["metadata"].transform_keys(&:to_sym)
+      assert_equal "image/jpeg", details["content_type"]
+      assert_match(/rails\/active_storage\/disk/, details["direct_upload"]["url"])
+      assert_equal({ "Content-Type" => "image/jpeg" }, details["direct_upload"]["headers"])
+    end
+  end
+
+  test "creating new direct upload with model where validation uses proc and fails" do
+    User.validates :avatar, attachment_content_type: { with: Proc.new { |user| user.persisted? ? %w[image/jpeg] : %w[image/png] } }
+
+    file = file_fixture("racecar.jpg").open
+    checksum = Digest::MD5.base64digest(file.read)
+    metadata = {
+      "foo": "bar",
+      "my_key_1": "my_value_1",
+      "my_key_2": "my_value_2",
+      "platform": "my_platform",
+      "library_ID": "12345"
+    }
+
+    post rails_direct_uploads_url, params: {
+      blob: {
+       filename: "racecar.jpg",
+       byte_size: file.size,
+       checksum: checksum,
+       content_type: "image/jpeg",
+       metadata: metadata,
+       signed_model_and_attribute: rails_direct_uploads_signed_model_and_attribute(User.new, :avatar),
+      }
+    }
+
+    assert_response :unprocessable_entity
+
+    @response.parsed_body.tap do |details|
+      assert_equal Hash[
+        "content_type" => [
+          "is not included in the list",
         ],
       ], details["errors"]
     end

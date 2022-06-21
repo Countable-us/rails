@@ -408,6 +408,30 @@ class ActiveStorage::AttachmentContentTypeValidatorTest < ActiveSupport::TestCas
     )
   end
 
+  test "passing a proc to :with option" do
+    User.validates_with(VALIDATOR, attributes: :avatar, with: Proc.new { |user| user.persisted? ? @content_types : @bad_content_types })
+    User.validates_with(VALIDATOR, attributes: :highlights, with: Proc.new { |user| user.persisted? ? @content_types : @bad_content_types })
+
+    @user.avatar.attach(@blob)
+    @user.highlights.attach(@blob)
+
+    assert @user.save
+
+    new_user = User.new
+    new_user.avatar.attach(@blob)
+    new_user.highlights.attach(@blob)
+
+    assert_not new_user.valid?
+    assert_equal(
+      ["is not included in the list"],
+      new_user.errors.messages[:avatar]
+    )
+    assert_equal(
+      ["is not included in the list"],
+      new_user.errors.messages[:highlights]
+    )
+  end
+
   test "inheritance of default ActiveModel options" do
     User.validates_with(VALIDATOR, attributes: :avatar, in: @bad_content_types, if: Proc.new { false })
     User.validates_with(VALIDATOR, attributes: :highlights, in: @bad_content_types, if: Proc.new { false })

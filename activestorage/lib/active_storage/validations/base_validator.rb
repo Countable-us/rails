@@ -8,17 +8,17 @@ module ActiveStorage
         @error_options = { message: options[:message] }
       end
 
-      def valid_with?(blob, attribute=nil)
+      def valid_with?(blob, record=nil, attribute=nil)
+        @record ||= record
         valid = true
         each_check do |check_name, check_value|
           next if passes_check?(blob, check_name, check_value)
 
-          # If we're dealing with a Blob that has an Attachment to an Attachable
-          if @record
-            @record.errors.add(@name, error_key_for(check_name), **error_options)
-          # If we're dealing with a direct upload Blob that has no Attachment to an Attachable
-          elsif attribute.present?
+          # If we're validating a blob directly, not through their Attachable
+          if attribute.present?
             blob.errors.add(blob_field_name, error_key_for(check_name), **error_options)
+          else
+            @record.errors.add(@name, error_key_for(check_name), **error_options)
           end
           valid = false
         end

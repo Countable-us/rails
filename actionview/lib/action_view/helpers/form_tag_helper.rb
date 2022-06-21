@@ -989,10 +989,6 @@ module ActionView
             options["data-direct-upload-url"] = rails_direct_uploads_url
           end
 
-          if options[:direct_upload_signed_model_and_attribute].present? && respond_to?(:rails_direct_uploads_signed_model_and_attribute)
-            options["data-direct-upload-signed-model-and-attribute"] = rails_direct_uploads_signed_model_and_attribute(options.delete(:direct_upload_signed_model_and_attribute))
-          end
-
           options
         end
     end

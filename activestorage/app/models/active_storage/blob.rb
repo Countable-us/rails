@@ -382,13 +382,15 @@ class ActiveStorage::Blob < ActiveStorage::Record
   def valid_with?(signed_model_and_attribute = nil)
     return true if signed_model_and_attribute.nil?
 
-    klass_name, attribute = ActiveStorage.verifier.verified(signed_model_and_attribute).split(".")
+    model_gid, attribute = ActiveStorage.verifier.verified(signed_model_and_attribute).split("--")
+    model = GlobalID::Locator.locate(model_gid)
 
-    model = ActiveRecord::Base.const_get(klass_name) rescue nil
-    return false if model.nil?
+    # When model_gid is a class name pointing to an unpersisted model
+    # model_gid => "User"
+    model ||= ActiveRecord::Base.const_get(model_gid).new
 
-    model.validators.select { |v| v.is_a?(ActiveStorage::Validations::BaseValidator) && v.attributes.include?(attribute.to_sym) }.each do |validator|
-      validator.valid_with?(self, attribute)
+    model.class.validators.select { |v| v.is_a?(ActiveStorage::Validations::BaseValidator) && v.attributes.include?(attribute.to_sym) }.each do |validator|
+      validator.valid_with?(self, model, attribute)
     end
 
     self.errors.blank?

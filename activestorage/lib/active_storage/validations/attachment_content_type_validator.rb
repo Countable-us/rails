@@ -53,11 +53,7 @@ module ActiveStorage
               end
               check_value.match?(blob.content_type)
             elsif check_value.respond_to?(:call)
-              # QUESTION: One would expect the proc or lambda to be called with
-              # the Attachable, not the Blob. However, for direct uploads there
-              # is no Attachable available. Should we pass the blob instead? Or
-              # nil?
-              check_value.call(@record || blob).match?(blob.content_type)
+              passes_check?(blob, :in, check_value.call(@record))
             else
               raise ArgumentError, "A regular expression, proc, or lambda must be supplied to :with"
             end

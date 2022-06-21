@@ -1,6 +1,4 @@
-*   Introduce Active Storage validators. Subclasses of `ActiveStorage::Validations::BaseValidator` run before creating a
-    `Blob` on direct upload, and before saving an `Attachment` via direct or indirect uploads. Includes built in validators
-    for content type and byte size.
+*   Introduce Active Storage validators. Subclasses of `ActiveStorage::Validations::BaseValidator` run before creating a `Blob` on direct upload, and before saving an `Attachment` via direct or indirect uploads. Includes built in validators for content type and byte size.
 
     See Active Storage guide for examples.
 
