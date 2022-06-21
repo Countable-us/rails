@@ -5,7 +5,7 @@ export class DirectUploadController {
   constructor(input, file) {
     this.input = input
     this.file = file
-    this.directUpload = new DirectUpload(this.file, this.url, this)
+    this.directUpload = new DirectUpload(this.file, this.url, this, this.signedValidationId)
     this.dispatch("initialize")
   }
 
@@ -39,6 +39,10 @@ export class DirectUploadController {
 
   get url() {
     return this.input.getAttribute("data-direct-upload-url")
+  }
+
+  get signedValidationId() {
+    return this.input.getAttribute("data-direct-upload-signed-validation-id")
   }
 
   dispatch(name, detail = {}) {

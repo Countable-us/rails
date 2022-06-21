@@ -571,6 +571,56 @@ user.avatar.purge_later
 [Attached::One#purge]: https://api.rubyonrails.org/classes/ActiveStorage/Attached/One.html#method-i-purge
 [Attached::One#purge_later]: https://api.rubyonrails.org/classes/ActiveStorage/Attached/One.html#method-i-purge_later
 
+Validating Files
+----------------
+
+Active Storage includes attachment validators for the following properties:
+
+* Byte Size
+* Content Type
+
+### Size
+
+Validates the size (in bytes) of the attached `Blob` object:
+
+    ```ruby
+    validates :avatar, attachment_byte_size: { in: 0..1.megabyte }
+    validates :avatar, attachment_byte_size: { minimum: 17.kilobytes }
+    validates :avatar, attachment_byte_size: { maximum: 38.megabytes }
+    ```
+
+Also accepts a `Range` as a shortcut option for `:in`:
+
+    ```ruby
+    validates :avatar, attachment_size: 0..1.megabyte
+    ```
+
+### Content Type
+
+Validates the content type of the attached `Blob` object:
+
+    ```ruby
+    validates :avatar, attachment_content_type: { in: %w[image/jpeg image/png] }
+    validates :avatar, attachment_content_type: { not: %w[application/pdf] }
+    ```
+
+Also accepts a `Array` or `String` as a shortcut option for `:in`:
+
+    ```ruby
+    validates :avatar, attachment_content_type: %w[image/jpeg image/png]
+    validates :avatar, attachment_content_type: "image/jpeg"
+    ```
+
+### Validation Helper
+
+Active Storage also provides a more readable validation helper named
+`validates_attachment()` which provides the same functionality as `validates()`
+but does not require the `attachment_` prefix on keys:
+
+    ```ruby
+    validates_attachment :avatar, byte_size: { in: 0..1.megabyte }, content_type: "image/jpeg"
+    ```
+
 Serving Files
 -------------
 
@@ -934,6 +984,31 @@ directly from the client to the cloud.
     ```erb
     <input type=file data-direct-upload-url="<%= rails_direct_uploads_url %>" />
     ```
+
+    `FormBuilder` will ensure any defined ActiveStorage validations get run for
+    direct uploads, however if you're not using `FormBuilder` and you want to
+    apply validations to direct uploads you will need to pass in the signed
+    validation id for the ActiveStorage enabled attribute. This ensures that
+    the correct validations are run for the direct upload.
+
+    ```erb
+    <input type=file data-direct-upload-url="<%= rails_direct_uploads_url %>" data-direct-upload-signed-validation-id="<%= @user.avatar.to_signed_validation_id %>" />
+    ```
+
+    Will apply any defined ActiveStorage validations on the `User` model's
+    `avatar` ActiveStorage attribute such as byte_size and content_type
+    validations. For example:
+    ```ruby
+      validates :avatar, attachment_byte_size: { in: 0..1.megabyte }
+      validates :avatar, attachment_content_type: { in: %w[image/jpeg image/png] }
+    ```
+
+    The direct upload will not proceed if the file's *reported* byte_size or
+    content_type do not pass validation. Note that ActiveStorage validations for
+    direct uploads are checking the byte_size and content_type information
+    provided by the client. They are not verifying the *actual* byte_size and
+    content_type of the file. That is beyond the scope of ActiveStorage
+    validations for direct uploads.
 
 3. Configure CORS on third-party storage services to allow direct upload requests.
 

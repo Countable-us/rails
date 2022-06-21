@@ -105,6 +105,49 @@ Variation of image attachment:
 <%= image_tag user.avatar.variant(resize_to_limit: [100, 100]) %>
 ```
 
+## Validations
+
+Active Storage includes attachment validators for the following properties:
+
+* Byte Size
+* Content Type
+
+```ruby
+class User < ActiveRecord::Base
+  has_one_attached :avatar
+
+  # Validating Size
+  # Accepts options for: `:in`, `:minimum`, `:maximum`
+  validates :avatar, attachment_byte_size: { in: 0..1.megabyte }
+  validates :avatar, attachment_byte_size: { minimum: 17.kilobytes }
+  validates :avatar, attachment_byte_size: { maximum: 37.megabytes }
+
+  # If you pass in a range `:in` is assumed and used
+  validates :avatar, attachment_byte_size: 0..1.megabyte
+
+  # Alternative syntax:
+  # validates_attachment :avatar, byte_size: { in: 0..1.megabyte }
+  # validates_attachment :avatar, byte_size: 0..1.megabyte
+  # validates_attachment_byte_size :avatar, in: 0..1.megabyte
+
+  # Validating Content Type
+  # Accepts options for: `:in`, `:not`
+  validates :avatar, attachment_content_type: { in: %w[image/jpeg image/png] }
+  validates :avatar, attachment_content_type: { not: %[image/gif] }
+
+  # If you pass in a string or array `:in` is assumed and used
+  validates :avatar, attachment_content_type: "image/jpeg"
+  validates :avatar, attachment_content_type: %w[image/jpeg image/png]
+
+  # Alternative syntax:
+  # validates_attachment :avatar, content_type: { in: %w[image/jpeg image/png] }
+  # validates_attachment :avatar, content_type: "image/jpeg"
+  # validates_attachment_content_type :avatar, in: %w[image/jpeg image/png]
+end
+```
+
+See the [rails guides](https://edgeguides.rubyonrails.org/active_storage_overview.html#validations) for more information.
+
 ## File serving strategies
 
 Active Storage supports two ways to serve files: redirecting and proxying.

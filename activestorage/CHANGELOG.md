@@ -1,3 +1,9 @@
+*   Introduce Active Storage validators. Subclasses of `ActiveStorage::Validations::BaseValidator` run before creating a `Blob` on direct upload, and before saving an `Attachment` via direct or indirect uploads. Includes built in validators for content type and byte size.
+
+    See Active Storage guide for examples.
+
+    *Abhishek Chandrasekhar*, *Alex Ghiculescu*, *Sean Abrahams*
+
 *   Fixes multiple `attach` calls within transaction not uploading files correctly.
 
     In the following example, the code failed to upload all but the last file to the configured service.
